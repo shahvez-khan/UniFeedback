@@ -1,0 +1,23 @@
+# Python Specific Files
+__pycache__/
+*.pyc
+*.o
+*.so
+
+# Python Virtual Environments (Do NOT commit this)
+venv/
+.venv/
+env/
+
+# IDE/Editor Specific Files
+.vscode/
+.idea/
+
+# Flask Secrets and Environment Variables
+.env
+instance/
+
+# Database Files (Do NOT commit the local database)
+*.db
+*.sqlite
+feedback.db
