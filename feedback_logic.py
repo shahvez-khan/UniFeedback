@@ -1,7 +1,13 @@
-import sqlite3
-from contextlib import closing
+import os
+import json
+# NEW: Import SQLAlchemy components to handle flexible database connections
+from sqlalchemy import create_engine, text
+from sqlalchemy.exc import SQLAlchemyError
+from contextlib import contextmanager
+# Removed: import sqlite3
+
+# Reportlab imports remain the same
 from reportlab.lib.pagesizes import A4
-# Replaced canvas with platypus imports for professional formatting
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
@@ -9,80 +15,137 @@ from reportlab.lib.units import inch
 
 CATEGORIES = ["Knowledge", "Clarity", "Engagement", "Punctuality"]
 
+# --- NEW: SQLAlchemy Global Engine and Connection Manager ---
+ENGINE = None
+def get_engine(db_path):
+    """Initializes the SQLAlchemy Engine, handling PostgreSQL URL formatting."""
+    global ENGINE
+    if ENGINE is not None:
+        return ENGINE
+    
+    # Convert 'postgres://' (used by Heroku/Render) to 'postgresql://' (used by SQLAlchemy)
+    if db_path and db_path.startswith("postgres://"):
+        db_path = db_path.replace("postgres://", "postgresql://", 1)
+    
+    # For local SQLite, use check_same_thread=False to prevent concurrency issues with Flask
+    connect_args = {"check_same_thread": False} if db_path.startswith("sqlite") else {}
+    
+    ENGINE = create_engine(db_path, connect_args=connect_args)
+    return ENGINE
+
+@contextmanager
+def db_session(db_path):
+    """Provides a context-managed database connection with transaction handling."""
+    conn = None
+    trans = None
+    try:
+        engine = get_engine(db_path)
+        conn = engine.connect()
+        trans = conn.begin()
+        yield conn
+        trans.commit()
+    except SQLAlchemyError:
+        if trans:
+            trans.rollback()
+        raise
+    finally:
+        if conn:
+            conn.close()
+
+# MODIFIED: Uses SQLAlchemy to create the table
 def ensure_db(db_path):
-    with closing(sqlite3.connect(db_path)) as conn:
-        c = conn.cursor()
-        c.execute('''CREATE TABLE IF NOT EXISTS feedback (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            faculty TEXT,
-            student TEXT,
-            ratings TEXT,
-            comment TEXT
-        )''')
-        conn.commit()
+    engine = get_engine(db_path)
+    # Use SERIAL PRIMARY KEY for Postgres compatibility; INTEGER PRIMARY KEY for SQLite
+    if db_path.startswith("postgresql"):
+        pk_type = "SERIAL PRIMARY KEY"
+    else:
+        pk_type = "INTEGER PRIMARY KEY"
 
+    create_table_sql = text(f'''CREATE TABLE IF NOT EXISTS feedback (
+        id {pk_type},
+        faculty TEXT,
+        student TEXT,
+        ratings TEXT,
+        comment TEXT
+    )''')
+    
+    try:
+        with engine.connect() as conn:
+            conn.execute(create_table_sql)
+            conn.commit()
+    except SQLAlchemyError as e:
+        # Log error during table creation, but don't stop the app
+        print(f"Error ensuring DB table: {e}")
+
+# MODIFIED: Uses SQLAlchemy text() for secure parameter passing
 def insert_submission(db_path, faculty, student, ratings, comment):
-    with closing(sqlite3.connect(db_path)) as conn:
-        c = conn.cursor()
-        c.execute("INSERT INTO feedback (faculty, student, ratings, comment) VALUES (?,?,?,?)",
-                  (faculty, student, str(ratings), comment))
-        conn.commit()
+    with db_session(db_path) as conn:
+        insert_sql = text("INSERT INTO feedback (faculty, student, ratings, comment) VALUES (:faculty, :student, :ratings, :comment)")
+        conn.execute(insert_sql, {
+            "faculty": faculty, 
+            "student": student, 
+            "ratings": str(ratings), 
+            "comment": comment
+        })
 
+# MODIFIED: Uses SQLAlchemy for fetching distinct faculties
 def get_faculties(db_path):
-    with closing(sqlite3.connect(db_path)) as conn:
-        c = conn.cursor()
-        c.execute("SELECT DISTINCT faculty FROM feedback")
-        return [row[0] for row in c.fetchall()]
+    with db_session(db_path) as conn:
+        select_sql = text("SELECT DISTINCT faculty FROM feedback")
+        # .scalars().all() fetches a list of the first column value (faculty name)
+        result = conn.execute(select_sql).scalars().all()
+        return list(result)
 
-# MODIFIED: Now returns response_count and overall_average
+# MODIFIED: Uses SQLAlchemy for fetching data for summary
 def get_faculty_summary(db_path, faculty):
-    with closing(sqlite3.connect(db_path)) as conn:
-        c = conn.cursor()
-        c.execute("SELECT ratings, comment FROM feedback WHERE faculty=?", (faculty,))
-        rows = c.fetchall()
-        if not rows:
-            return None
-        
-        response_count = len(rows)
-        
-        totals = {cat: 0 for cat in CATEGORIES}
-        counts = {cat: 0 for cat in CATEGORIES}
-        comments = []
-        
-        for ratings_str, comment in rows:
-            try:
-                # Retain original use of eval() for compatibility with the database structure
-                ratings = eval(ratings_str) 
-            except:
-                continue
-            
-            for cat in CATEGORIES:
-                if cat in ratings:
-                    totals[cat] += ratings[cat]
-                    counts[cat] += 1
-            if comment:
-                comments.append(comment)
-        
-        # Calculate category averages
-        averages = {cat: round(totals[cat]/counts[cat],2) if counts[cat]>0 else 0.0 for cat in CATEGORIES}
-        
-        # Calculate overall average (mean of all category averages)
-        overall_avg = round(sum(averages.values()) / len(CATEGORIES), 2) if CATEGORIES else 0.0
+    # This function uses the old raw logic after fetching data
+    with db_session(db_path) as conn:
+        select_sql = text("SELECT ratings, comment FROM feedback WHERE faculty=:faculty")
+        # .fetchall() returns a list of tuples like the old sqlite3 result
+        rows = conn.execute(select_sql, {"faculty": faculty}).fetchall()
 
-        return {
-            "averages": averages, 
-            "comments": comments,
-            "response_count": response_count,
-            "overall_average": overall_avg
-        }
+    if not rows:
+        return None
+    
+    response_count = len(rows)
+    
+    totals = {cat: 0 for cat in CATEGORIES}
+    counts = {cat: 0 for cat in CATEGORIES}
+    comments = []
+    
+    for ratings_str, comment in rows:
+        try:
+            # Retain original use of eval() for compatibility with the database structure
+            ratings = eval(ratings_str) 
+        except:
+            continue
+        
+        for cat in CATEGORIES:
+            if cat in ratings:
+                totals[cat] += ratings[cat]
+                counts[cat] += 1
+        if comment:
+            comments.append(comment)
+    
+    # Calculate category averages
+    averages = {cat: round(totals[cat]/counts[cat],2) if counts[cat]>0 else 0.0 for cat in CATEGORIES}
+    
+    # Calculate overall average (mean of all category averages)
+    overall_avg = round(sum(averages.values()) / len(CATEGORIES), 2) if CATEGORIES else 0.0
 
-# NEW: Utility function for star display in PDF
+    return {
+        "averages": averages, 
+        "comments": comments,
+        "response_count": response_count,
+        "overall_average": overall_avg
+    }
+
+# Remaining PDF functions are unchanged as they rely only on the summary dict
 def stars_from_rating(avg: float, max_stars: int = 5) -> str:
     filled = int(round(avg))
     empty = max_stars - filled
     return "★" * filled + "☆" * empty
 
-# MODIFIED: Generates a professional PDF report
 def build_pdf_for_faculty(db_path, faculty, buffer):
     summary = get_faculty_summary(db_path, faculty)
     
