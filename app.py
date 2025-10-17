@@ -12,7 +12,7 @@ from feedback_logic import (
     build_pdf_for_faculty,
 )
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='.')
 app.secret_key = os.environ.get("SECRET_KEY", "change-this-secret")
 
 DB_PATH = os.environ.get("DATABASE_URL", "feedback.db")
