@@ -1,0 +1,5 @@
+Flask
+gunicorn
+reportlab>=3.6
+SQLAlchemy
+psycopg2-binary # PostgreSQL driver
