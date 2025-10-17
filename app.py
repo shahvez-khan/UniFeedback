@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, send_file,
 import sqlite3
 from contextlib import closing
 from io import BytesIO
+import os
 from feedback_logic import (
     CATEGORIES,
     ensure_db,
@@ -12,9 +13,9 @@ from feedback_logic import (
 )
 
 app = Flask(__name__)
-app.secret_key = "change-this-secret"
+app.secret_key = os.environ.get("SECRET_KEY", "change-this-secret")
 
-DB_PATH = "feedback.db"
+DB_PATH = os.environ.get("DATABASE_URL", "feedback.db")
 ensure_db(DB_PATH)
 
 @app.get("/")
