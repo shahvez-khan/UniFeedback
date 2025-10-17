@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Feedback System | Home</title>
+    <!-- Load Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom configuration for Inter font and colors -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#0d9488', // Teal 600 (Professional, calm blue-green)
+                        secondary: '#f0fdfa', // Light Gray-Green (Very light background)
+                        accent: '#f97316', // Orange 600 (Energetic accent)
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Ensures smooth scrolling and Inter font is applied */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Slate 50 */
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+    <!-- Header / Navigation Bar (Mobile-Optimized) -->
+    <header class="bg-white shadow-md sticky top-0 z-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <a href="{{ url_for('home') }}" class="text-2xl font-bold text-primary">
+                <span class="text-accent">Uni</span>Feedback
+            </a>
+            
+            <!-- Grouped Header Items (Nav and Button) - NEW STRUCTURE -->
+            <nav class="hidden md:flex space-x-6 items-center">
+                
+                <a href="{{ url_for('home') }}" class="text-gray-600 hover:text-primary transition duration-150 font-medium">Home</a>
+                <a href="{{ url_for('feedback') }}" class="text-gray-600 hover:text-primary transition duration-150 font-medium">Give Feedback</a>
+                <a href="{{ url_for('results') }}" class="text-gray-600 hover:text-primary transition duration-150 font-medium">View Results</a>
+                
+                <!-- Desktop Action Button -->
+                <a href="{{ url_for('feedback') }}" class="bg-primary hover:bg-[#0f766e] text-white font-semibold py-2 px-4 rounded-lg shadow-lg transition duration-150 transform hover:scale-105">
+                    Start Feedback
+                </a>
+            </nav>
+
+            <!-- Mobile Menu Button -->
+            <button id="mobile-menu-btn" class="md:hidden text-gray-600 hover:text-primary p-2 rounded-lg transition duration-150">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Menu Drawer -->
+    <div id="mobile-menu" class="hidden md:hidden fixed inset-0 bg-white z-30 transition-transform duration-300 transform translate-x-full">
+        <div class="p-4 border-b flex justify-between items-center shadow-sm">
+            <div class="text-2xl font-bold text-primary"><span class="text-accent">Uni</span>Feedback</div>
+            <button id="close-menu-btn" class="text-gray-600 hover:text-primary p-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <nav class="flex flex-col space-y-2 p-4">
+            <a href="{{ url_for('home') }}" class="py-3 px-4 text-lg font-medium text-gray-800 hover:bg-gray-100 rounded-md transition duration-150">Home</a>
+            <a href="{{ url_for('feedback') }}" class="py-3 px-4 text-lg font-medium text-gray-800 hover:bg-gray-100 rounded-md transition duration-150">Give Feedback</a>
+            <a href="{{ url_for('results') }}" class="py-3 px-4 text-lg font-medium text-gray-800 hover:bg-gray-100 rounded-md transition duration-150">View Results</a>
+            <a href="{{ url_for('feedback') }}" class="mt-4 bg-primary hover:bg-[#0f766e] text-white font-semibold py-3 px-4 rounded-lg shadow-lg transition duration-150 text-center">Start Feedback</a>
+        </nav>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow">
+        <!-- Hero Section: System Introduction -->
+        <section class="bg-secondary pt-16 pb-24 sm:pt-24 sm:pb-32">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 leading-tight mb-4">
+                    The Secure <span class="text-primary">Faculty Feedback</span> Platform
+                </h1>
+                <p class="mt-6 text-base sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">
+                    Your confidential voice for academic improvement. Provide constructive feedback on faculty, course material, and teaching quality to help us build a better learning environment.
+                </p>
+                <div class="mt-10">
+                    <a href="{{ url_for('feedback') }}" class="bg-accent hover:bg-[#c2410a] text-white font-bold py-3 px-8 rounded-lg shadow-xl transition duration-300 transform hover:-translate-y-1 text-lg">
+                        Give Feedback Now
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section: Why Use This System -->
+        <section class="py-20 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">
+                    How UniFeedback Benefits You
+                </h2>
+
+                <!-- Ensures stacking on mobile -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-10">
+                    
+                    <!-- Feature 1: Anonymity -->
+                    <div class="bg-white p-6 sm:p-8 rounded-xl shadow-2xl transition duration-300 hover:shadow-primary/20 border border-gray-100">
+                        <div class="text-4xl text-primary mb-4">🔒</div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">Complete Anonymity</h3>
+                        <p class="text-gray-600">
+                            All submissions are completely anonymous. We prioritize your privacy to ensure honest and candid responses, free from any fear of reprisal.
+                        </p>
+                    </div>
+
+                    <!-- Feature 2: Focused Improvement -->
+                    <div class="bg-white p-6 sm:p-8 rounded-xl shadow-2xl transition duration-300 hover:shadow-primary/20 border border-gray-100">
+                        <div class="text-4xl text-accent mb-4">🚀</div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">Driving Quality Education</h3>
+                        <p class="text-gray-600">
+                            Your input is directly used by administration and faculty to implement targeted improvements in curriculum and teaching methodologies.
+                        </p>
+                    </div>
+
+                    <!-- Feature 3: Simple & Quick -->
+                    <div class="bg-white p-6 sm:p-8 rounded-xl shadow-2xl transition duration-300 hover:shadow-primary/20 border border-gray-100">
+                        <div class="text-4xl text-primary mb-4">⏱️</div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">Intuitive User Experience</h3>
+                        <p class="text-gray-600">
+                            The system is designed for quick and easy navigation. Complete a comprehensive feedback form in minutes using any device.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- NEW SECTION: Process Overview -->
+        <section class="py-20 bg-gray-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">
+                    The 3-Step Feedback Process
+                </h2>
+                <!-- Ensures stacking on mobile -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    
+                    <div class="text-center p-6 bg-white rounded-xl shadow-lg border border-gray-200">
+                        <div class="text-5xl font-extrabold text-primary mb-3">1</div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Submit Your Review</h3>
+                        <p class="text-gray-600">
+                            Fill out the confidential form, providing ratings (1-5) on key categories like **Knowledge** and **Clarity**, and leave detailed comments.
+                        </p>
+                    </div>
+
+                    <div class="text-center p-6 bg-white rounded-xl shadow-lg border border-gray-200">
+                        <div class="text-5xl font-extrabold text-accent mb-3">2</div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Data Aggregation</h3>
+                        <p class="text-gray-600">
+                            The system automatically calculates averages for each faculty member across all criteria, ensuring anonymity is maintained throughout the process.
+                        </p>
+                    </div>
+
+                    <div class="text-center p-6 bg-white rounded-xl shadow-lg border border-gray-200">
+                        <div class="text-5xl font-extrabold text-primary mb-3">3</div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Review & Act</h3>
+                        <p class="text-gray-600">
+                            Faculty and administrators access professional PDF reports to identify areas of strength and opportunities for development.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Preview Section: Form Teaser (Kept for action) -->
+        <section class="bg-white py-20">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl font-bold text-center text-gray-900 mb-4">
+                    Ready to Make a Difference?
+                </h2>
+                <p class="text-center text-lg text-gray-600 mb-10">
+                    Your contribution helps us measure performance across **Knowledge**, **Clarity**, **Engagement**, and **Punctuality**.
+                </p>
+
+                <!-- Mock Search/Select Area (Mobile-Optimized) -->
+                <div class="bg-gray-100 p-6 md:p-10 rounded-xl shadow-inner border border-gray-200">
+                    <form action="{{ url_for('results') }}" method="GET">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="col-span-1 md:col-span-2">
+                                <label for="search" class="block text-sm font-medium text-gray-700 mb-1">View Results by Faculty Name</label>
+                                <input type="text" name="faculty" id="search" placeholder="e.g., Prof. Smith" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                            </div>
+                            <!-- Added mt-4 for mobile spacing -->
+                            <div class="col-span-1 flex items-end mt-4 md:mt-0">
+                                <button type="submit" class="w-full bg-primary hover:bg-[#0f766e] text-white font-semibold py-3 px-4 rounded-lg transition duration-150 shadow-md">
+                                    Search & View
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- NEW SECTION: Impact (Detailed Descriptions Added) -->
+        <section class="py-20 bg-secondary">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">
+                    The Impact of Your Feedback
+                </h2>
+                <!-- Adjusted grid to stack better on small mobiles (sm:grid-cols-2) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    
+                    <div class="p-6 bg-white rounded-xl shadow-lg hover:shadow-primary/30 transition duration-300">
+                        <div class="text-4xl text-primary mb-2">📈</div>
+                        <p class="font-semibold text-gray-800">Data-Driven Decisions</p>
+                        <p class="text-sm text-gray-600 mt-1">We transform raw ratings into actionable reports, allowing administration to make informed choices about training and resource allocation.</p>
+                    </div>
+
+                    <div class="p-6 bg-white rounded-xl shadow-lg hover:shadow-primary/30 transition duration-300">
+                        <div class="text-4xl text-accent mb-2">📚</div>
+                        <p class="font-semibold text-gray-800">Improved Course Content</p>
+                        <p class="text-sm text-gray-600 mt-1">Direct feedback on subject clarity and engagement helps instructors refine course materials and delivery for better learning outcomes.</p>
+                    </div>
+
+                    <div class="p-6 bg-white rounded-xl shadow-lg hover:shadow-primary/30 transition duration-300">
+                        <div class="text-4xl text-primary mb-2">🎓</div>
+                        <p class="font-semibold text-gray-800">Enhanced Student Success</p>
+                        <p class="text-sm text-gray-600 mt-1">By raising teaching standards, we directly contribute to a more effective educational experience, leading to higher grades and deeper understanding.</p>
+                    </div>
+                    
+                    <div class="p-6 bg-white rounded-xl shadow-lg hover:shadow-primary/30 transition duration-300">
+                        <div class="text-4xl text-accent mb-2">🤝</div>
+                        <p class="font-semibold text-gray-800">Better Faculty Engagement</p>
+                        <p class="text-sm text-gray-600 mt-1">Constructive criticism and recognition foster a culture of continuous professional development and stronger faculty-student rapport.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-auto py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm">
+            &copy; 2025 UniFeedback System. All rights reserved. | <a href="#" class="text-primary hover:text-accent">Privacy Policy</a>
+        </div>
+    </footer>
+
+    <!-- JavaScript for Mobile Menu Toggle -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuBtn = document.getElementById('mobile-menu-btn');
+            const closeBtn = document.getElementById('close-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            // Function to open the menu
+            const openMenu = () => {
+                mobileMenu.classList.remove('hidden', 'translate-x-full');
+                mobileMenu.classList.add('translate-x-0');
+            };
+
+            // Function to close the menu
+            const closeMenu = () => {
+                mobileMenu.classList.remove('translate-x-0');
+                mobileMenu.classList.add('translate-x-full');
+                // Hide after transition ends (300ms, matching the transition-duration-300 class)
+                setTimeout(() => {
+                    mobileMenu.classList.add('hidden');
+                }, 300);
+            };
+
+            menuBtn.addEventListener('click', openMenu);
+            closeBtn.addEventListener('click', closeMenu);
+
+            // Close menu if a navigation link is clicked
+            mobileMenu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', closeMenu);
+            });
+        });
+    </script>
+</body>
+</html>

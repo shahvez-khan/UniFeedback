@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Feedback System | Submit</title>
+    <!-- Load Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom configuration for Inter font and colors -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#0d9488', // Teal 600 (Professional, calm blue-green)
+                        secondary: '#f0fdfa', // Light Gray-Green (Very light background)
+                        accent: '#f97316', // Orange 600 (Energetic accent)
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Ensures smooth scrolling and Inter font is applied */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Slate 50 */
+        }
+        /* Custom styles for select box rating stars */
+        .rating-select {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%230d9488'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+    <!-- Header / Navigation Bar (Mobile-Optimized) -->
+    <header class="bg-white shadow-md sticky top-0 z-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <a href="{{ url_for('home') }}" class="text-2xl font-bold text-primary">
+                <span class="text-accent">Uni</span>Feedback
+            </a>
+            
+            <!-- Grouped Header Items (Nav and Button) -->
+            <nav class="hidden md:flex space-x-6 items-center">
+                <a href="{{ url_for('home') }}" class="text-gray-600 hover:text-primary transition duration-150 font-medium">Home</a>
+                <a href="{{ url_for('feedback') }}" class="text-gray-600 hover:text-primary transition duration-150 font-medium">Give Feedback</a>
+                <a href="{{ url_for('results') }}" class="text-gray-600 hover:text-primary transition duration-150 font-medium">View Results</a>
+                <a href="{{ url_for('feedback') }}" class="bg-primary hover:bg-[#0f766e] text-white font-semibold py-2 px-4 rounded-lg shadow-lg transition duration-150 transform hover:scale-105">
+                    Start Feedback
+                </a>
+            </nav>
+
+            <!-- Mobile Menu Button -->
+            <button id="mobile-menu-btn" class="md:hidden text-gray-600 hover:text-primary p-2 rounded-lg transition duration-150">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Menu Drawer -->
+    <div id="mobile-menu" class="hidden md:hidden fixed inset-0 bg-white z-30 transition-transform duration-300 transform translate-x-full">
+        <div class="p-4 border-b flex justify-between items-center shadow-sm">
+            <div class="text-2xl font-bold text-primary"><span class="text-accent">Uni</span>Feedback</div>
+            <button id="close-menu-btn" class="text-gray-600 hover:text-primary p-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <nav class="flex flex-col space-y-2 p-4">
+            <a href="{{ url_for('home') }}" class="py-3 px-4 text-lg font-medium text-gray-800 hover:bg-gray-100 rounded-md transition duration-150">Home</a>
+            <a href="{{ url_for('feedback') }}" class="py-3 px-4 text-lg font-medium text-gray-800 hover:bg-gray-100 rounded-md transition duration-150">Give Feedback</a>
+            <a href="{{ url_for('results') }}" class="py-3 px-4 text-lg font-medium text-gray-800 hover:bg-gray-100 rounded-md transition duration-150">View Results</a>
+            <a href="{{ url_for('feedback') }}" class="mt-4 bg-primary hover:bg-[#0f766e] text-white font-semibold py-3 px-4 rounded-lg shadow-lg transition duration-150 text-center">Start Feedback</a>
+        </nav>
+    </div>
+
+    <main class="flex-grow">
+        <div class="max-w-xl mx-auto mt-8 md:mt-12 mb-12 p-6 sm:p-8 bg-white rounded-xl shadow-2xl border border-gray-100">
+            <h1 class="text-3xl font-bold text-gray-900 mb-6 text-center">Faculty Feedback Form</h1>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                <div class="mb-4 space-y-2">
+                  {% for category, msg in messages %}
+                    <div class="p-4 rounded-lg font-medium 
+                      {% if category == 'error' %} bg-red-100 text-red-700 border border-red-200 
+                      {% elif category == 'success' %} bg-green-100 text-green-700 border border-green-200 
+                      {% else %} bg-gray-100 text-gray-700 border border-gray-200 {% endif %}">
+                      {{ msg }}
+                    </div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('submit') }}">
+              
+              <div class="mb-4">
+                <label for="faculty" class="block text-sm font-semibold text-gray-700 mb-1">Faculty Name (Required)</label>
+                <input type="text" name="faculty" required 
+                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition duration-150"
+                       placeholder="e.g., Prof. Jane Doe">
+              </div>
+
+              <div class="mb-6">
+                <label for="student" class="block text-sm font-semibold text-gray-700 mb-1">Your Name (Optional)</label> 
+                <input type="text" name="student" 
+                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition duration-150"
+                       placeholder="Optional: Enter your name (not shown to faculty)">
+              </div>
+              
+              <h2 class="text-xl font-bold text-primary mb-4 border-b pb-2">Rating Categories (1=Poor, 5=Excellent)</h2>
+
+              {% for cat in categories %}
+                <div class="mb-4">
+                    <label for="rating_{{ cat }}" class="block text-base font-medium text-gray-700 mb-1">{{ cat }}:</label> 
+                    <select name="rating_{{ cat }}" id="rating_{{ cat }}" required
+                            class="rating-select w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition duration-150">
+                      <option value="">-- Select Rating --</option>
+                      {% for i in range(1,6) %}
+                        <option value="{{ i }}">{{ i }} {% if i == 5 %} (Excellent) {% elif i == 1 %} (Poor) {% endif %} ⭐</option>
+                      {% endfor %}
+                    </select>
+                </div>
+              {% endfor %}
+
+              <div class="mt-8 mb-6">
+                <label for="comment" class="block text-sm font-semibold text-gray-700 mb-1">Comments (Optional, for improvement):</label>
+                <textarea name="comment" id="comment"
+                          class="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition duration-150"
+                          placeholder="Provide constructive feedback and specific examples..."></textarea>
+              </div>
+
+              <button type="submit" 
+                      class="w-full bg-accent hover:bg-[#c2410a] text-white font-bold py-3 px-6 rounded-lg shadow-xl transition duration-300 transform hover:scale-[1.01]">
+                Submit Confidential Feedback
+              </button>
+            </form>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-auto py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm">
+            &copy; 2025 UniFeedback System. All rights reserved. | <a href="#" class="text-primary hover:text-accent">Privacy Policy</a>
+        </div>
+    </footer>
+
+    <!-- JavaScript for Mobile Menu Toggle -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuBtn = document.getElementById('mobile-menu-btn');
+            const closeBtn = document.getElementById('close-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            const openMenu = () => {
+                mobileMenu.classList.remove('hidden', 'translate-x-full');
+                mobileMenu.classList.add('translate-x-0');
+            };
+
+            const closeMenu = () => {
+                mobileMenu.classList.remove('translate-x-0');
+                mobileMenu.classList.add('translate-x-full');
+                setTimeout(() => {
+                    mobileMenu.classList.add('hidden');
+                }, 300);
+            };
+
+            menuBtn.addEventListener('click', openMenu);
+            closeBtn.addEventListener('click', closeMenu);
+
+            mobileMenu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', closeMenu);
+            });
+        });
+    </script>
+</body>
+</html>
